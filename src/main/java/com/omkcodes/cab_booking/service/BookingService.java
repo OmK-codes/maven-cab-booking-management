@@ -18,6 +18,7 @@ public class BookingService {
                 .ifPresentOrElse(System.out::println,
                         () -> System.out.println("Booking details are not available."));
     }
+
     public Booking createNewBooking(String bookingId, String passengerId, String passengerName,
                                     String driverId, String driverName, String vehicleId,
                                     String pickupLocation, String dropLocation, double fare,
@@ -26,9 +27,11 @@ public class BookingService {
         if (bookingId == null || bookingId.trim().isEmpty()) {
             throw new InvalidBookingIDException("Booking ID cannot be null or empty.");
         }
+
         return bookingList.computeIfAbsent(bookingId, id -> {
             Booking booking = new Booking();
             BookingStatus bookingStatus = BookingStatus.PENDING;
+
             try {
                 bookingStatus = BookingStatus.valueOf(statusInput.toUpperCase());
             } catch (IllegalArgumentException e) {
@@ -45,10 +48,11 @@ public class BookingService {
             booking.setDropLocation(dropLocation);
             booking.setFare(fare);
             booking.setDistance(distance);
-            booking.setBookingStatus(bookingStatus);
+            booking.setStatus(bookingStatus);
             return booking;
         });
     }
+
     public void showAllBookings() {
         if (bookingList.isEmpty()) {
             System.out.println("No bookings available.");
@@ -56,16 +60,19 @@ public class BookingService {
             bookingList.values().forEach(booking -> System.out.println("Booking Information: " + booking));
         }
     }
+
     public List<String> getAllBookingIds() {
         return bookingList.values().stream()
                 .map(Booking::getBookingId)
                 .collect(Collectors.toList());
     }
+
     public List<Booking> getBookingsByStatus(BookingStatus status) {
         return bookingList.values().stream()
-                .filter(booking -> Objects.equals(booking.getBookingStatus(), status))
+                .filter(booking -> Objects.equals(booking.getStatus(), status))
                 .collect(Collectors.toList());
     }
+
     public HashMap<String, Booking> getBookingList() {
         return bookingList;
     }

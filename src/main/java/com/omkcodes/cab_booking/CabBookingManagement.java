@@ -25,7 +25,7 @@ public class CabBookingManagement {
         int mainOption;
         do {
             displayMainMenu();
-            mainOption = getIntInput(scanner, "Select an option: ");
+            mainOption = getIntInput(scanner,"Select an option: ");
             switch (mainOption) {
                 case 1 -> driverController.run();
                 case 2 -> passengerController.run();
