@@ -1,16 +1,20 @@
 package com.omkcodes.cab_booking.controller;
 
+import com.omkcodes.cab_booking.exception.InvalidBookingIDException;
 import com.omkcodes.cab_booking.service.BookingService;
+import com.omkcodes.cab_booking.service.impl.BookingServiceImpl;
 
 import java.util.Scanner;
 
 public class BookingController {
     private final Scanner scanner;
     private final BookingService bookingService;
-    public BookingController(Scanner scanner, BookingService bookingService) {
+
+    public BookingController(Scanner scanner, BookingServiceImpl bookingService) {
         this.scanner = scanner;
-        this.bookingService = bookingService;
+        this.bookingService = new BookingServiceImpl();
     }
+
     public void run() {
         int option;
         do {
@@ -26,6 +30,7 @@ public class BookingController {
             }
         } while (option != 9);
     }
+
     private void displayMenu() {
         System.out.println("""
                 \n=== Booking Management ===
@@ -35,6 +40,7 @@ public class BookingController {
                 9. Return to main menu
                 """);
     }
+
     private void createBooking() {
         String bookingId = getStringInput("Enter Booking ID:");
         String passengerId = getStringInput("Enter Passenger ID:");
@@ -47,6 +53,7 @@ public class BookingController {
         double fare = getDoubleInput("Enter Fare:");
         double distance = getDoubleInput("Enter Distance:");
         String status = getStringInput("Enter Booking Status (PENDING/CONFIRMED/COMPLETED/CANCELLED):");
+
         try {
             bookingService.createNewBooking(
                     bookingId, passengerId, passengerName, driverId, driverName, vehicleId,
@@ -57,14 +64,21 @@ public class BookingController {
             System.out.println("Error creating booking: " + e.getMessage());
         }
     }
+
     private void displayBookingDetails() {
         String bookingId = getStringInput("Enter Booking ID:");
-        bookingService.displayBookingDetails(bookingService.getBookingList().get(bookingId));
+        try {
+            bookingService.displayBookingDetails(bookingService.getBookingById(bookingId));
+        } catch (InvalidBookingIDException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
+
     private String getStringInput(String message) {
         System.out.print(message + " ");
         return scanner.nextLine().trim();
     }
+
     private int getIntInput(String message) {
         while (true) {
             try {
@@ -75,6 +89,7 @@ public class BookingController {
             }
         }
     }
+
     private double getDoubleInput(String message) {
         while (true) {
             try {

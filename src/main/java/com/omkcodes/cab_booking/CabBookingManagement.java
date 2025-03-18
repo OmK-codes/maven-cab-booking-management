@@ -4,20 +4,20 @@ import com.omkcodes.cab_booking.controller.BookingController;
 import com.omkcodes.cab_booking.controller.DriverController;
 import com.omkcodes.cab_booking.controller.PassengerController;
 import com.omkcodes.cab_booking.controller.VehicleController;
-import com.omkcodes.cab_booking.service.BookingService;
-import com.omkcodes.cab_booking.service.DriverService;
-import com.omkcodes.cab_booking.service.PassengerService;
-import com.omkcodes.cab_booking.service.VehicleService;
+import com.omkcodes.cab_booking.service.impl.BookingServiceImpl;
+import com.omkcodes.cab_booking.service.impl.DriverServiceImpl;
+import com.omkcodes.cab_booking.service.impl.PassengerServiceImpl;
+import com.omkcodes.cab_booking.service.impl.VehicleServiceImpl;
 
 import java.util.Scanner;
 
 public class CabBookingManagement {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        DriverService driverService = new DriverService();
-        PassengerService passengerService = new PassengerService();
-        VehicleService vehicleService = new VehicleService();
-        BookingService bookingService = new BookingService();
+        DriverServiceImpl driverService = new DriverServiceImpl();
+        PassengerServiceImpl passengerService = new PassengerServiceImpl();
+        VehicleServiceImpl vehicleService = new VehicleServiceImpl();
+        BookingServiceImpl bookingService = new BookingServiceImpl();
         DriverController driverController = new DriverController(scanner, driverService);
         PassengerController passengerController = new PassengerController(scanner, passengerService);
         VehicleController vehicleController = new VehicleController(scanner, vehicleService);
@@ -25,7 +25,7 @@ public class CabBookingManagement {
         int mainOption;
         do {
             displayMainMenu();
-            mainOption = getIntInput(scanner,"Select an option: ");
+            mainOption = getIntInput(scanner, "Select an option: ");
             switch (mainOption) {
                 case 1 -> driverController.run();
                 case 2 -> passengerController.run();
@@ -37,6 +37,7 @@ public class CabBookingManagement {
         } while (mainOption != 0);
         scanner.close();
     }
+
     private static void displayMainMenu() {
         System.out.println("\n=== CAB BOOKING MANAGEMENT ===");
         System.out.println("1. Manage Drivers");
@@ -45,6 +46,7 @@ public class CabBookingManagement {
         System.out.println("4. Manage Bookings");
         System.out.println("0. Exit");
     }
+
     private static int getIntInput(Scanner scanner, String message) {
         while (true) {
             try {

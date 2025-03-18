@@ -10,10 +10,12 @@ import java.util.Scanner;
 public class PassengerController {
     private final Scanner scanner;
     private final PassengerService passengerService;
+
     public PassengerController(Scanner scanner, PassengerService passengerService) {
         this.scanner = scanner;
         this.passengerService = passengerService;
     }
+
     public void run() {
         int option;
         do {
@@ -28,6 +30,7 @@ public class PassengerController {
             }
         } while (option != 9);
     }
+
     private void displayMenu() {
         System.out.println("""
                 Please select an option from the list below:
@@ -37,6 +40,7 @@ public class PassengerController {
                 9. Go back to main menu
                 """);
     }
+
     private void addNewPassenger() {
         try {
             String passengerId = getStringInput("Enter Passenger ID:");
@@ -51,6 +55,7 @@ public class PassengerController {
             System.out.println("Error adding passenger: " + e.getMessage());
         }
     }
+
     private void displayPassengerDetails() {
         String passengerId = getStringInput("Enter Passenger ID to display details:");
         Optional.ofNullable(passengerService.getPassengerList().get(passengerId))
@@ -59,10 +64,12 @@ public class PassengerController {
                         () -> System.out.println("Passenger not found.")
                 );
     }
+
     private String getStringInput(String message) {
         System.out.print(message + " ");
         return scanner.nextLine().trim();
     }
+
     private int getIntInput(String message) {
         while (true) {
             try {

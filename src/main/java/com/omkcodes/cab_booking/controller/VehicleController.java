@@ -1,16 +1,13 @@
 package com.omkcodes.cab_booking.controller;
-
 import com.omkcodes.cab_booking.exception.InvalidVehicleIDException;
 import com.omkcodes.cab_booking.model.Vehicle;
 import com.omkcodes.cab_booking.service.VehicleService;
 
 import java.util.Optional;
 import java.util.Scanner;
-
 public class VehicleController {
     private final Scanner scanner;
     private final VehicleService vehicleService;
-
     public VehicleController(Scanner scanner, VehicleService vehicleService) {
         this.scanner = scanner;
         this.vehicleService = vehicleService;
@@ -42,18 +39,15 @@ public class VehicleController {
         try {
             String vehicleId = getStringInput("Enter Vehicle ID:");
             String model = getStringInput("Enter Vehicle Model:");
-            String plateNumber = getStringInput("Enter License Plate Number:");
+            String registrationNumber = getStringInput("Enter Registration Number:");
             String color = getStringInput("Enter Vehicle Color:");
-            boolean availability = getBooleanInput("Is the vehicle available? (true/false):");
+            boolean available = getBooleanInput("Is the vehicle available? (true/false):");
             int seatCapacity = getIntInput("Enter Seat Capacity:");
             double perKmRate = getDoubleInput("Enter Per KM Rate:");
             String status = getStringInput("Enter Vehicle Status (AVAILABLE/UNAVAILABLE):").toUpperCase();
-
-            // Call the corrected method with appropriate parameters
             Vehicle newVehicle = vehicleService.createNewVehicle(
-                    vehicleId, model, plateNumber, color, availability, seatCapacity, perKmRate, status
+                    vehicleId, model, registrationNumber, color, available, seatCapacity, perKmRate, status
             );
-
             System.out.println("Vehicle added successfully: " + newVehicle);
         } catch (InvalidVehicleIDException e) {
             System.out.println("Error adding vehicle: " + e.getMessage());
@@ -61,7 +55,6 @@ public class VehicleController {
     }
     private void displayVehicleDetails() {
         String vehicleId = getStringInput("Enter Vehicle ID to display details:");
-
         Optional.ofNullable(vehicleService.getVehicleList().get(vehicleId))
                 .ifPresentOrElse(
                         vehicleService::displayVehicleDetails,
@@ -72,7 +65,6 @@ public class VehicleController {
         System.out.print(message + " ");
         return scanner.nextLine().trim();
     }
-
     private int getIntInput(String message) {
         while (true) {
             try {
