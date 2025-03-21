@@ -3,95 +3,88 @@ package com.omkcodes.cab_booking.service.impl;
 import com.omkcodes.cab_booking.enums.BookingStatus;
 import com.omkcodes.cab_booking.exception.InvalidBookingIDException;
 import com.omkcodes.cab_booking.model.Booking;
+import com.omkcodes.cab_booking.repository.BookingRepository;
 import com.omkcodes.cab_booking.service.BookingService;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class BookingServiceImpl implements BookingService {
-    private final HashMap<String, Booking> bookingList = new HashMap<>();
+    private final BookingRepository bookingRepository = new BookingRepository();
+
     @Override
     public void displayBookingDetails(Booking booking) {
-        Optional.ofNullable(booking)
-                .ifPresentOrElse(System.out::println,
-                        () -> System.out.println("Booking details are not available."));
+        if (booking != null) {
+            System.out.println("Booking Details: " + booking);
+        } else {
+            System.out.println("Booking details are not available.");
+        }
     }
+
     @Override
     public Booking createNewBooking(String bookingId, String passengerId, String passengerName,
                                     String driverId, String driverName, String vehicleId,
                                     String pickupLocation, String dropLocation, double fare,
                                     double distance, String statusInput) throws InvalidBookingIDException {
 
-        if (bookingId == null || bookingId.trim().isEmpty()) {
-            throw new InvalidBookingIDException("Booking ID cannot be null or empty.");
+        BookingStatus status;
+        try {
+            status = BookingStatus.valueOf(statusInput.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidBookingIDException("Invalid booking status: " + statusInput);
         }
 
-        return bookingList.computeIfAbsent(bookingId, id -> {
-            Booking booking = new Booking();
-            BookingStatus bookingStatus = BookingStatus.PENDING;
+        Booking booking = new Booking(bookingId, passengerId, passengerName, driverId, driverName,
+                vehicleId, pickupLocation, dropLocation, fare, distance, status);
 
-            try {
-                bookingStatus = BookingStatus.valueOf(statusInput.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                System.out.println("Invalid booking status! Setting default to PENDING.");
-            }
-
-            booking.setBookingId(id);
-            booking.setPassengerId(passengerId);
-            booking.setPassengerName(passengerName);
-            booking.setDriverId(driverId);
-            booking.setDriverName(driverName);
-            booking.setVehicleId(vehicleId);
-            booking.setPickupLocation(pickupLocation);
-            booking.setDropLocation(dropLocation);
-            booking.setFare(fare);
-            booking.setDistance(distance);
-            booking.setStatus(bookingStatus);
-            return booking;
-        });
-    }
-
-    @Override
-    public Booking updateBookingStatus(String bookingId, BookingStatus newStatus) throws InvalidBookingIDException {
-        if (!bookingList.containsKey(bookingId)) {
-            throw new InvalidBookingIDException("Booking not found with ID: " + bookingId);
-        }
-        Booking booking = bookingList.get(bookingId);
-        booking.setStatus(newStatus);
+        bookingRepository.saveBooking(booking);
+        System.out.println("Booking created successfully!");
         return booking;
     }
 
     @Override
     public void showAllBookings() {
-        if (bookingList.isEmpty()) {
-            System.out.println("No bookings available.");
+        Map<String, Booking> bookings = bookingRepository.getAllBookings();
+        if (bookings.isEmpty()) {
+            System.out.println("No bookings found.");
         } else {
-            bookingList.values().forEach(System.out::println);
+            bookings.values().forEach(System.out::println);
         }
+    }
+
+    @Override
+    public Booking updateBookingStatus(String bookingId, BookingStatus newStatus) throws InvalidBookingIDException {
+        Booking booking = bookingRepository.findBookingById(bookingId);
+        if (booking == null) {
+            throw new InvalidBookingIDException("Booking ID not found: " + bookingId);
+        }
+        booking.setStatus(newStatus);
+        bookingRepository.saveBooking(booking);
+        System.out.println("Booking status updated successfully!");
+        return booking;
     }
 
     @Override
     public Booking getBookingById(String bookingId) throws InvalidBookingIDException {
-        if (!bookingList.containsKey(bookingId)) {
-            throw new InvalidBookingIDException("Booking not found with ID: " + bookingId);
+        Booking booking = bookingRepository.findBookingById(bookingId);
+        if (booking == null) {
+            throw new InvalidBookingIDException("No booking found with ID: " + bookingId);
         }
-        return bookingList.get(bookingId);
+        return booking;
     }
 
     @Override
     public List<String> getAllBookingIds() {
-        return bookingList.values().stream()
-                .map(Booking::getBookingId)
-                .collect(Collectors.toList());
+        return new ArrayList<>(bookingRepository.getAllBookings().keySet());
     }
 
     @Override
     public List<Booking> getBookingsByStatus(BookingStatus status) {
-        return bookingList.values().stream()
-                .filter(booking -> Objects.equals(booking.getStatus(), status))
+        return bookingRepository.getAllBookings().values()
+                .stream()
+                .filter(booking -> booking.getStatus() == status)
                 .collect(Collectors.toList());
     }
 }

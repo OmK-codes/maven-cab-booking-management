@@ -1,67 +1,60 @@
 package com.omkcodes.cab_booking.service.impl;
 
-import com.omkcodes.cab_booking.enums.DriverStatus;
 import com.omkcodes.cab_booking.model.Driver;
+import com.omkcodes.cab_booking.repository.DriverRepository;
 import com.omkcodes.cab_booking.service.DriverService;
-
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DriverServiceImpl implements DriverService {
-    private final Map<String, Driver> driverList = new HashMap<>();
-
-    @Override
-    public void displayDriverDetails(Driver driver) {
-        Optional.ofNullable(driver)
-                .ifPresentOrElse(System.out::println,
-                        () -> System.out.println("Driver details are not available."));
-    }
+    private final DriverRepository driverRepository = new DriverRepository();
 
     @Override
     public Driver createNewDriver(String driverId, String driverName, String phone,
                                   String licenseNumber, int totalTrips, boolean onlineStatus,
                                   String statusInput) {
-        if (driverId == null || driverId.trim().isEmpty()) {
-            throw new IllegalArgumentException("Driver ID cannot be null or empty.");
-        }
-        return driverList.computeIfAbsent(driverId, id -> {
-            DriverStatus driverStatus = DriverStatus.INACTIVE;
-            try {
-                driverStatus = DriverStatus.valueOf(statusInput.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                System.out.println("Invalid driver status! Setting default to INACTIVE.");
-            }
-
-            return new Driver(id, driverName, phone, licenseNumber, totalTrips, onlineStatus, driverStatus);
-        });
+        Driver driver = new Driver(driverId, driverName, phone, licenseNumber, totalTrips, onlineStatus, null);
+        driverRepository.saveDriver(driver);
+        return driver;
     }
 
     @Override
     public void showAllDrivers() {
-        if (driverList.isEmpty()) {
-            System.out.println("No drivers available.");
+        Map<String, Driver> drivers = driverRepository.getAllDrivers();
+        if (drivers.isEmpty()) {
+            System.out.println("No drivers found.");
         } else {
-            driverList.values().forEach(System.out::println);
+            drivers.values().forEach(System.out::println);
         }
     }
 
     @Override
     public List<Driver> getOnlineDrivers() {
-        return driverList.values().stream()
+        return driverRepository.getAllDrivers().values().stream()
                 .filter(Driver::isOnlineStatus)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Driver> getTopDriversByTrips(int limit) {
-        return driverList.values().stream()
-                .sorted(Comparator.comparingInt(Driver::getTotalTrips).reversed())
+        return driverRepository.getAllDrivers().values().stream()
+                .sorted((d1, d2) -> Integer.compare(d2.getTotalTrips(), d1.getTotalTrips()))
                 .limit(limit)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Map<String, Driver> getDriverList() {
-        return driverList;
+        return driverRepository.getAllDrivers();
+    }
+
+    @Override
+    public void displayDriverDetails(Driver driver) {
+        if (driver != null) {
+            System.out.println(driver);
+        } else {
+            System.out.println("Driver not found!");
+        }
     }
 }
