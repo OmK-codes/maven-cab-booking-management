@@ -3,7 +3,6 @@ package com.omkcodes.cab_booking.controller;
 import com.omkcodes.cab_booking.exception.InvalidPassengerIDException;
 import com.omkcodes.cab_booking.model.Passenger;
 import com.omkcodes.cab_booking.service.PassengerService;
-
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -25,6 +24,8 @@ public class PassengerController {
                 case 1 -> addNewPassenger();
                 case 2 -> passengerService.showAllPassengers();
                 case 3 -> displayPassengerDetails();
+                case 4 -> updatePassenger();
+                case 5 -> deletePassenger();
                 case 9 -> System.out.println("Going back to main menu...");
                 default -> System.out.println("Invalid option. Please try again.");
             }
@@ -37,6 +38,8 @@ public class PassengerController {
                 1. Add a new passenger
                 2. Show all passengers
                 3. Display passenger details
+                4. Update passenger details
+                5. Delete passenger
                 9. Go back to main menu
                 """);
     }
@@ -47,9 +50,10 @@ public class PassengerController {
             String passengerName = getStringInput("Enter Passenger Name:");
             String phone = getStringInput("Enter Phone Number:");
             String email = getStringInput("Enter Email:");
+            String address = getStringInput("Enter Address:");
             String status = getStringInput("Enter Passenger Status (ACTIVE/INACTIVE):");
 
-            Passenger newPassenger = passengerService.createNewPassenger(passengerId, passengerName, phone, email, status);
+            Passenger newPassenger = passengerService.createNewPassenger(passengerId, passengerName, phone, email, address, status);
             System.out.println("Passenger added successfully: " + newPassenger);
         } catch (InvalidPassengerIDException e) {
             System.out.println("Error adding passenger: " + e.getMessage());
@@ -58,11 +62,47 @@ public class PassengerController {
 
     private void displayPassengerDetails() {
         String passengerId = getStringInput("Enter Passenger ID to display details:");
-        Optional.ofNullable(passengerService.getPassengerList().get(passengerId))
-                .ifPresentOrElse(
-                        passengerService::displayPassengerDetails,
-                        () -> System.out.println("Passenger not found.")
-                );
+        Passenger passenger = passengerService.findPassengerById(passengerId);
+
+        if (passenger != null) {
+            passengerService.displayPassengerDetails(passengerId);
+        } else {
+            System.out.println("Passenger not found.");
+        }
+    }
+
+    private void updatePassenger() {
+        String passengerId = getStringInput("Enter Passenger ID to update:");
+        Passenger existingPassenger = passengerService.findPassengerById(passengerId);
+
+        if (existingPassenger == null) {
+            System.out.println("Passenger not found.");
+            return;
+        }
+
+        System.out.println("Leave fields empty to keep existing values.");
+        String name = getStringInput("Enter new Name:");
+        String email = getStringInput("Enter new Email:");
+        String phone = getStringInput("Enter new Phone:");
+        String address = getStringInput("Enter new Address:");
+        String status = getStringInput("Enter new Status (ACTIVE/INACTIVE):");
+
+        boolean success = passengerService.updatePassenger(passengerId, name, email, phone, address, status);
+        if (success) {
+            System.out.println("Passenger updated successfully!");
+        } else {
+            System.out.println("Failed to update passenger.");
+        }
+    }
+
+    private void deletePassenger() {
+        String passengerId = getStringInput("Enter Passenger ID to delete:");
+        boolean success = passengerService.deletePassenger(passengerId);
+        if (success) {
+            System.out.println("Passenger deleted successfully.");
+        } else {
+            System.out.println("Passenger deletion failed or ID not found.");
+        }
     }
 
     private String getStringInput(String message) {

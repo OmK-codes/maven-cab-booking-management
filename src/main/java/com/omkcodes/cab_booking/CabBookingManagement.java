@@ -37,7 +37,6 @@ public class CabBookingManagement {
         } while (mainOption != 0);
         scanner.close();
     }
-
     private static void displayMainMenu() {
         System.out.println("\n=== CAB BOOKING MANAGEMENT ===");
         System.out.println("1. Manage Drivers");
@@ -46,7 +45,6 @@ public class CabBookingManagement {
         System.out.println("4. Manage Bookings");
         System.out.println("0. Exit");
     }
-
     private static int getIntInput(Scanner scanner, String message) {
         while (true) {
             try {

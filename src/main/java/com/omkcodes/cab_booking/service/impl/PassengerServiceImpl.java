@@ -7,51 +7,46 @@ import com.omkcodes.cab_booking.repository.PassengerRepository;
 import com.omkcodes.cab_booking.service.PassengerService;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PassengerServiceImpl implements PassengerService {
     private final PassengerRepository passengerRepository = new PassengerRepository();
-
     @Override
-    public void displayPassengerDetails(Passenger passenger) {
+    public void displayPassengerDetails(String passengerId) {
+        Passenger passenger = findPassengerById(passengerId);
         if (passenger != null) {
             System.out.println("Passenger Details: " + passenger);
         } else {
-            System.out.println("Passenger details not available.");
+            System.out.println("No passenger found with ID: " + passengerId);
         }
     }
-
+    @Override
+    public Passenger findPassengerById(String passengerId) {
+        return passengerRepository.findPassengerById(passengerId);
+    }
     @Override
     public List<Passenger> getPassengersByStatus(PassengerStatus status) {
-        return passengerRepository.getAllPassengers().values().stream()
+        return passengerRepository.getAllPassengers().stream()
                 .filter(passenger -> passenger.getPassengerStatus() == status)
                 .collect(Collectors.toList());
     }
-
     @Override
     public List<String> getAllPassengerNames() {
-        return passengerRepository.getAllPassengers().values().stream()
+        return passengerRepository.getAllPassengers().stream()
                 .map(Passenger::getPassengerName)
                 .collect(Collectors.toList());
     }
-
     @Override
     public void showAllPassengers() {
-        Map<String, Passenger> passengers = passengerRepository.getAllPassengers();
+        List<Passenger> passengers = passengerRepository.getAllPassengers();
         if (passengers.isEmpty()) {
-            System.out.println("No passengers found.");
+            System.out.println("No passengers available.");
         } else {
-            passengers.values().forEach(System.out::println);
+            passengers.forEach(System.out::println);
         }
     }
-
     @Override
-    public Map<String, Passenger> getPassengerList() {
-        return passengerRepository.getAllPassengers();
-    }
-    @Override
-    public Passenger createNewPassenger(String passengerId, String passengerName, String phone, String email, String statusInput)
+    public Passenger createNewPassenger(String passengerId, String passengerName, String phone, String email, String address, String statusInput)
             throws InvalidPassengerIDException {
         if (passengerId == null || passengerId.isEmpty()) {
             throw new InvalidPassengerIDException("Passenger ID cannot be null or empty.");
@@ -61,14 +56,43 @@ public class PassengerServiceImpl implements PassengerService {
         }
         PassengerStatus status;
         try {
-            status = PassengerStatus.valueOf(statusInput.toUpperCase());
+            status = PassengerStatus.valueOf(statusInput.toUpperCase()); // Convert status string to enum
         } catch (IllegalArgumentException e) {
             throw new InvalidPassengerIDException("Invalid Passenger Status: " + statusInput);
         }
+        Passenger newPassenger = new Passenger(passengerId, passengerName, email, phone, address, status);
+        boolean success = passengerRepository.savePassenger(newPassenger);
+        if (success) {
+            System.out.println("Passenger created successfully!");
+            return newPassenger;
+        } else {
+            throw new InvalidPassengerIDException("Failed to create passenger.");
+        }
+    }
 
-        Passenger newPassenger = new Passenger(passengerId, passengerName, email, phone, "N/A", status);
-        passengerRepository.savePassenger(newPassenger);
-        System.out.println("Passenger created successfully!");
-        return newPassenger;
+    @Override
+    public boolean updatePassenger(String passengerId, String name, String phone, String email, String address, String statusInput) {
+        Passenger passenger = findPassengerById(passengerId);
+        if (passenger == null) {
+            System.out.println("Passenger not found.");
+            return false;
+        }
+        if (!name.isEmpty()) passenger.setPassengerName(name);
+        if (!phone.isEmpty()) passenger.setPhone(phone);
+        if (!email.isEmpty()) passenger.setEmail(email);
+        if (!address.isEmpty()) passenger.setAddress(address);
+        if (!statusInput.isEmpty()) {
+            try {
+                PassengerStatus status = PassengerStatus.valueOf(statusInput.toUpperCase());
+                passenger.setPassengerStatus(status);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid status provided. Keeping existing status.");
+            }
+        }
+        return passengerRepository.updatePassenger(passenger);
+    }
+    @Override
+    public boolean deletePassenger(String passengerId) {
+        return passengerRepository.deletePassenger(passengerId);
     }
 }
