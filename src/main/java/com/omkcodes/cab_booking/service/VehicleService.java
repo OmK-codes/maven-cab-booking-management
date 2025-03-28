@@ -3,7 +3,7 @@ package com.omkcodes.cab_booking.service;
 import com.omkcodes.cab_booking.exception.InvalidVehicleIDException;
 import com.omkcodes.cab_booking.model.Vehicle;
 
-import java.util.Map;
+import java.util.List;
 
 public interface VehicleService {
     Vehicle createNewVehicle(String vehicleId, String model, String registrationNumber,
@@ -12,7 +12,7 @@ public interface VehicleService {
 
     void showAllVehicles();
 
-    void displayVehicleDetails(Vehicle vehicle);
+    void displayVehicleDetails(String vehicleId);
 
-    Map<String, Vehicle> getVehicleList();
+    List<Vehicle> getVehicleList();
 }

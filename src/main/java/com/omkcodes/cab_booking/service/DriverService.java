@@ -15,7 +15,9 @@ public interface DriverService {
 
     List<Driver> getTopDriversByTrips(int limit);
 
-    Map<String, Driver> getDriverList();
+    List<Driver> getDriverList();
 
     void displayDriverDetails(Driver driver);
+
+    Driver getDriverById(String driverId);
 }

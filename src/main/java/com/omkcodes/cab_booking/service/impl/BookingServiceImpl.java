@@ -6,13 +6,14 @@ import com.omkcodes.cab_booking.model.Booking;
 import com.omkcodes.cab_booking.repository.BookingRepository;
 import com.omkcodes.cab_booking.service.BookingService;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class BookingServiceImpl implements BookingService {
-    private final BookingRepository bookingRepository = new BookingRepository();
+    private final BookingRepository bookingRepository;
+
+    public BookingServiceImpl(BookingRepository bookingRepository) {
+        this.bookingRepository = bookingRepository;
+    }
 
     @Override
     public void displayBookingDetails(Booking booking) {
@@ -20,6 +21,16 @@ public class BookingServiceImpl implements BookingService {
             System.out.println("Booking Details: " + booking);
         } else {
             System.out.println("Booking details are not available.");
+        }
+    }
+
+    @Override
+    public void showAllBookings() {
+        List<Booking> bookings = bookingRepository.getAllBookings();
+        if (bookings.isEmpty()) {
+            System.out.println("No bookings found.");
+        } else {
+            bookings.forEach(System.out::println);
         }
     }
 
@@ -39,31 +50,18 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = new Booking(bookingId, passengerId, passengerName, driverId, driverName,
                 vehicleId, pickupLocation, dropLocation, fare, distance, status);
 
-        bookingRepository.saveBooking(booking);
-        System.out.println("Booking created successfully!");
-        return booking;
-    }
-
-    @Override
-    public void showAllBookings() {
-        Map<String, Booking> bookings = bookingRepository.getAllBookings();
-        if (bookings.isEmpty()) {
-            System.out.println("No bookings found.");
-        } else {
-            bookings.values().forEach(System.out::println);
+        if (!bookingRepository.saveBooking(booking)) {
+            throw new InvalidBookingIDException("Failed to save booking.");
         }
+        return booking;
     }
 
     @Override
     public Booking updateBookingStatus(String bookingId, BookingStatus newStatus) throws InvalidBookingIDException {
-        Booking booking = bookingRepository.findBookingById(bookingId);
-        if (booking == null) {
-            throw new InvalidBookingIDException("Booking ID not found: " + bookingId);
+        if (!bookingRepository.updateBookingStatus(bookingId, newStatus)) {
+            throw new InvalidBookingIDException("Failed to update booking status.");
         }
-        booking.setStatus(newStatus);
-        bookingRepository.saveBooking(booking);
-        System.out.println("Booking status updated successfully!");
-        return booking;
+        return bookingRepository.findBookingById(bookingId);
     }
 
     @Override
@@ -76,15 +74,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<String> getAllBookingIds() {
-        return new ArrayList<>(bookingRepository.getAllBookings().keySet());
-    }
-
-    @Override
     public List<Booking> getBookingsByStatus(BookingStatus status) {
-        return bookingRepository.getAllBookings().values()
-                .stream()
+        return bookingRepository.getAllBookings().stream()
                 .filter(booking -> booking.getStatus() == status)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

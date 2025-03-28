@@ -6,7 +6,8 @@ import com.omkcodes.cab_booking.model.Vehicle;
 import com.omkcodes.cab_booking.repository.VehicleRepository;
 import com.omkcodes.cab_booking.service.VehicleService;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VehicleServiceImpl implements VehicleService {
     private final VehicleRepository vehicleRepository = new VehicleRepository();
@@ -37,16 +38,17 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     public void showAllVehicles() {
-        Map<String, Vehicle> vehicles = vehicleRepository.getAllVehicles();
+        List<Vehicle> vehicles = getVehicleList();
         if (vehicles.isEmpty()) {
             System.out.println("No vehicles found.");
         } else {
-            vehicles.values().forEach(System.out::println);
+            vehicles.forEach(System.out::println);
         }
     }
 
     @Override
-    public void displayVehicleDetails(Vehicle vehicle) {
+    public void displayVehicleDetails(String vehicleId) {
+        Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
         if (vehicle != null) {
             System.out.println("Vehicle Details: " + vehicle);
         } else {
@@ -55,7 +57,7 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public Map<String, Vehicle> getVehicleList() {
-        return vehicleRepository.getAllVehicles();
+    public List<Vehicle> getVehicleList() {
+        return new ArrayList<>(vehicleRepository.getAllVehicles().values());
     }
 }

@@ -56,7 +56,7 @@ public class PassengerServiceImpl implements PassengerService {
         }
         PassengerStatus status;
         try {
-            status = PassengerStatus.valueOf(statusInput.toUpperCase()); // Convert status string to enum
+            status = PassengerStatus.valueOf(statusInput.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new InvalidPassengerIDException("Invalid Passenger Status: " + statusInput);
         }

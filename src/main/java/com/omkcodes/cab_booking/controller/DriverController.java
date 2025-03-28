@@ -54,7 +54,7 @@ public class DriverController {
 
     private void displayDriverDetails() {
         String driverId = getStringInput("Enter Driver ID:");
-        Driver driver = driverService.getDriverList().get(driverId);
+        Driver driver = driverService.getDriverById(driverId);
         driverService.displayDriverDetails(driver);
     }
 

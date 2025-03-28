@@ -2,7 +2,6 @@ package com.omkcodes.cab_booking.controller;
 
 import com.omkcodes.cab_booking.exception.InvalidBookingIDException;
 import com.omkcodes.cab_booking.service.BookingService;
-import com.omkcodes.cab_booking.service.impl.BookingServiceImpl;
 
 import java.util.Scanner;
 
@@ -10,9 +9,9 @@ public class BookingController {
     private final Scanner scanner;
     private final BookingService bookingService;
 
-    public BookingController(Scanner scanner, BookingServiceImpl bookingService) {
+    public BookingController(Scanner scanner, BookingService bookingService) {
         this.scanner = scanner;
-        this.bookingService = new BookingServiceImpl();
+        this.bookingService = bookingService; // Use the provided instance instead of creating a new one.
     }
 
     public void run() {
